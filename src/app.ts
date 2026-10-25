@@ -1,12 +1,15 @@
 import express, { type NextFunction, type Request, type Response } from 'express';
-import { isDatabaseConnected } from './config/database';
+import { ensureDatabaseConnection } from './config/database';
 import { DATABASE_UNAVAILABLE_MESSAGE, errorHandler, notFoundHandler } from './middleware/errorHandler';
 import couponRoutes from './routes/coupons';
 import { HttpError } from './utils/httpError';
 
 /*
- * The Express application: middleware and routes only. Starting the server and connecting
- * to MongoDB happen in server.ts, so the tests can use this app without opening a real port.
+ * The Express application: middleware and routes only.
+ * - Locally, server.ts connects to MongoDB and then starts the server with this app.
+ *   The tests also use this app directly, without opening a real port.
+ * - On Vercel this file is the entry point (see vercel.json): Vercel imports the app, server.ts
+ *   never runs, and the first request opens the database connection (ensureDatabaseConnection).
  */
 const app = express();
 
@@ -17,8 +20,8 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '10kb' }));
 
 /** GET /health: quick check that the API is running and connected to MongoDB. */
-app.get('/health', (_req, res) => {
-  const connected = isDatabaseConnected();
+app.get('/health', async (_req, res) => {
+  const connected = await ensureDatabaseConnection();
   res.status(connected ? 200 : 503).json({
     status: connected ? 'ok' : 'unavailable',
     database: connected ? 'connected' : 'disconnected',
@@ -26,15 +29,15 @@ app.get('/health', (_req, res) => {
 });
 
 /**
- * If MongoDB goes down after the server has started, answer 503 straight away
- * instead of making the client wait for the database timeout.
+ * The coupon routes need MongoDB. If it can't be reached, answer 503 with a clear message
+ * instead of letting the request fail later inside a route.
  */
-function requireDatabase(_req: Request, _res: Response, next: NextFunction): void {
-  if (!isDatabaseConnected()) {
-    next(new HttpError(503, DATABASE_UNAVAILABLE_MESSAGE));
+async function requireDatabase(_req: Request, _res: Response, next: NextFunction): Promise<void> {
+  if (await ensureDatabaseConnection()) {
+    next();
     return;
   }
-  next();
+  next(new HttpError(503, DATABASE_UNAVAILABLE_MESSAGE));
 }
 
 app.use('/coupons', requireDatabase, couponRoutes);

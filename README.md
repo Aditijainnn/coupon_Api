@@ -22,6 +22,7 @@ them on an order.
 - [Installation and setup](#installation-and-setup)
 - [Running the API](#running-the-api)
 - [Frontend (bonus React page)](#frontend-bonus-react-page)
+- [Deploying to Vercel](#deploying-to-vercel)
 - [API reference](#api-reference)
 - [Status codes and errors](#status-codes-and-errors)
 - [Testing](#testing)
@@ -75,7 +76,8 @@ coupon-api/
 │   └── server.ts                 # Entry point: load .env, connect to MongoDB, then listen
 ├── tests/
 │   ├── unit.test.ts              # Validation, expiry rule and calculation (no database needed)
-│   └── api.test.ts               # HTTP tests of every endpoint (needs MongoDB)
+│   ├── api.test.ts               # HTTP tests of every endpoint (needs MongoDB)
+│   └── lazy-connection.test.ts   # The app connects on its first request, as on Vercel (needs MongoDB)
 ├── client/                       # Bonus React page (its own package.json, see below)
 │   ├── src/api.ts                # Calls to the API
 │   ├── src/App.tsx               # Page layout, loading coupons, API health check
@@ -88,6 +90,7 @@ coupon-api/
 ├── package.json / package-lock.json
 ├── tsconfig.json                 # TypeScript settings (used by VS Code and `npm run typecheck`)
 ├── tsconfig.build.json           # Compiles src/ into dist/ (used by `npm run build`)
+├── vercel.json                   # Vercel deployment: the page at /, the API at /coupons and /health
 ├── README.md
 └── ANSWERS.md                    # Part 2 answers
 ```
@@ -257,6 +260,34 @@ The screenshots use sample coupons.
 
 <img src="docs/screenshots/mobile.png" alt="The page on a phone: the preview ticket above the form" width="320">
 
+## Deploying to Vercel
+
+The repository deploys to Vercel as **one project with two services**, configured in `vercel.json`:
+
+| Service | What it is | Handles |
+| --- | --- | --- |
+| `web` | The React page in `client/` (Vite) | Everything else, starting with `/` |
+| `api` | The Express API, entry point `src/app.ts` | `/coupons`, `/coupons/apply` and `/health` |
+
+Both services share one address, so the page calls the API with the same paths it uses in
+development (`/coupons`, `/health`). No CORS setup is needed.
+
+1. **MongoDB Atlas:** go to **Network Access**, click **Add IP Address**, and choose
+   **Allow access from anywhere** (`0.0.0.0/0`). Vercel's servers don't have fixed IP addresses,
+   so a single IP isn't enough. The database password still protects the data.
+2. **Vercel:** choose **Add New → Project** and import the GitHub repository. Vercel reads
+   `vercel.json` and shows the **Services** preset with `web` and `api`.
+3. **Environment variables:** add `MONGODB_URI` with the same connection string as in your `.env`.
+   `PORT` isn't needed, because Vercel chooses the port.
+4. Click **Deploy**, then open the deployment's address. The page's badge should say "API and
+   database connected", and `/health` should return `{"status":"ok","database":"connected"}`.
+
+**How the API runs on Vercel.** Vercel imports `src/app.ts` and runs it as a function, so
+`src/server.ts` never runs and nothing connects to MongoDB at startup. Instead, the first request
+opens the connection and later requests reuse it (`ensureDatabaseConnection` in
+`src/config/database.ts`). `tests/lazy-connection.test.ts` checks this. Running locally works as
+before: `server.ts` connects first, then starts the server.
+
 ## API reference
 
 Base URL: `http://localhost:3000`. Request bodies must be JSON and sent with the header
@@ -404,6 +435,9 @@ npm test
   deletes before each test, so your real data is never touched. Without `MONGODB_URI` this suite
   is skipped. It also checks that the API answers `503` when the database disconnects, and recovers
   after reconnecting.
+- `tests/lazy-connection.test.ts` loads the app without `server.ts`, as Vercel does, and checks that
+  the first request connects to MongoDB. It only calls `GET /health`, so no coupons are read or
+  changed. Without `MONGODB_URI` it is skipped.
 
 ### Manual test plan
 
@@ -541,8 +575,9 @@ curl -i -X POST http://localhost:3000/coupons/apply \
 - `GET /coupons` returns every coupon with no pagination, which is fine for a small number of coupons.
 - Coupons can't be updated or deleted through the API, because the assignment didn't ask for it.
 - A single currency with 2 decimal places is assumed. Expiry is checked against the server's clock.
-- The React page is for local use: it reaches the API through Vite's dev or preview server, and it
-  has no automated tests of its own in this repository.
+- The React page has no automated tests of its own in this repository.
+- On Vercel, the first request after a quiet period also opens the database connection, so it can
+  take a second or two longer than the requests after it.
 
 ## Troubleshooting
 

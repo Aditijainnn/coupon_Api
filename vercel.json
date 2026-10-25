@@ -1,0 +1,20 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "api": {
+      "root": "./",
+      "framework": "express",
+      "entrypoint": "src/app.ts"
+    },
+    "web": {
+      "root": "client/",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    { "source": "/coupons", "destination": { "service": "api" } },
+    { "source": "/coupons/(.*)", "destination": { "service": "api" } },
+    { "source": "/health", "destination": { "service": "api" } },
+    { "source": "/(.*)", "destination": { "service": "web" } }
+  ]
+}

@@ -10,6 +10,9 @@ dist/
 .env.*
 !.env.example
 
+# Local Vercel CLI settings (created by `vercel link` / `vercel dev`)
+.vercel
+
 # Logs
 *.log
 npm-debug.log*
