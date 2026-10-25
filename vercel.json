@@ -4,7 +4,8 @@
     "api": {
       "root": "./",
       "framework": "express",
-      "entrypoint": "src/app.ts"
+      "entrypoint": "src/app.ts",
+      "buildCommand": "npm run typecheck"
     },
     "web": {
       "root": "client/",
