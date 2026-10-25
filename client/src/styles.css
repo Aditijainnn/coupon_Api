@@ -1,0 +1,710 @@
+/* ==========================================================================
+   Tokens
+   Tickets and the receipt are "paper", so they keep their colours in dark mode.
+   ========================================================================== */
+:root {
+  --counter: #e8ebf4; /* page background: the shop counter */
+  --surface: #ffffff; /* form fields */
+  --ink: #1d2b53; /* main text */
+  --ink-soft: #545e86; /* secondary text */
+  --rule: #c5cbe0; /* borders and dividers */
+  --action: #2f45c8; /* buttons, links, focus rings */
+  --action-ink: #ffffff;
+  --alert: #c8243a; /* error messages */
+  --ok: #1c7c52; /* success messages, "connected" */
+
+  --stock: #ffd84d; /* ticket card stock */
+  --stock-faded: #ddd6bd; /* an expired ticket */
+  --ticket-ink: #1d2b53; /* printing on tickets */
+  --stamp: #c8243a; /* the "Expired" rubber stamp */
+  --paper: #fbfbf6; /* receipt paper */
+  --paper-ink: #1d2b53;
+  --paper-soft: #6b7290;
+
+  --radius-field: 10px;
+  --radius-ticket: 16px;
+  --shadow-paper: drop-shadow(0 16px 22px rgb(29 43 83 / 0.26)) drop-shadow(0 2px 3px rgb(29 43 83 / 0.18));
+
+  --font: 'Archivo Variable', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --counter: #10182f;
+    --surface: #18223f;
+    --ink: #eef1fb;
+    --ink-soft: #a7b0d0;
+    --rule: #34416d;
+    --action: #9aa8ff;
+    --action-ink: #0f1631;
+    --alert: #ff8796;
+    --ok: #67d9a6;
+    --shadow-paper: drop-shadow(0 18px 26px rgb(0 0 0 / 0.55)) drop-shadow(0 2px 4px rgb(0 0 0 / 0.4));
+    color-scheme: dark;
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--counter);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--action);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Page layout
+   ========================================================================== */
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 44px 24px 56px;
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px 32px;
+  padding-bottom: 28px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.masthead__title {
+  font-size: clamp(2.9rem, 8vw, 5rem);
+  font-stretch: 66%;
+  font-weight: 860;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+
+.masthead__intro {
+  max-width: 46ch;
+  margin-top: 14px;
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+}
+
+.sections {
+  display: grid;
+  gap: 80px;
+  padding-top: 52px;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-stretch: 78%;
+  font-weight: 790;
+  line-height: 1.1;
+}
+
+.section-intro {
+  max-width: 52ch;
+  margin-top: 8px;
+  color: var(--ink-soft);
+}
+
+.footer {
+  margin-top: 88px;
+  padding-top: 20px;
+  border-top: 2px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field__label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-weight: 650;
+}
+
+.field__value {
+  font-size: 1.375rem;
+  font-stretch: 72%;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+
+.field__hint {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+.field__scale {
+  display: flex;
+  justify-content: space-between;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.input {
+  width: 100%;
+  min-height: 50px;
+  padding: 11px 14px;
+  border: 2px solid var(--rule);
+  border-radius: var(--radius-field);
+  background: var(--surface);
+  font-size: 1.0625rem;
+  transition: border-color 0.15s;
+}
+
+.input:hover {
+  border-color: var(--ink-soft);
+}
+
+.input:focus-visible {
+  border-color: var(--ink);
+  outline-offset: 2px;
+}
+
+/* Codes are stored in capitals, so the field shows them that way while you type. */
+.input--code {
+  font-stretch: 115%;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.input--code::placeholder {
+  letter-spacing: 0.06em;
+}
+
+.range {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  accent-color: var(--action);
+  cursor: pointer;
+}
+
+/* The code was just filled in from a coupon in the list. */
+.field--filled .input {
+  animation: filled 1.4s ease-out;
+}
+
+@keyframes filled {
+  from {
+    border-color: var(--ticket-ink);
+    background: var(--stock);
+    color: var(--ticket-ink);
+  }
+}
+
+.button {
+  justify-self: start;
+  padding: 13px 24px;
+  border: 0;
+  border-radius: var(--radius-field);
+  background: var(--action);
+  color: var(--action-ink);
+  box-shadow: 0 3px 0 rgb(29 43 83 / 0.35);
+  font-size: 1.0625rem;
+  font-weight: 720;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.button--quiet {
+  border: 2px solid currentColor;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+}
+
+.link-button {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--action);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.feedback {
+  min-height: 1.6em;
+}
+
+.feedback__error {
+  color: var(--alert);
+  font-weight: 650;
+}
+
+.feedback__success {
+  color: var(--ok);
+  font-weight: 650;
+}
+
+/* ==========================================================================
+   API health badge
+   ========================================================================== */
+.health {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px 8px 14px;
+  border: 2px solid var(--rule);
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.health__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+
+.health--ok .health__dot {
+  background: var(--ok);
+  animation: pulse 2.4s ease-out infinite;
+}
+
+.health--api-down .health__dot,
+.health--database-down .health__dot {
+  background: var(--alert);
+}
+
+@keyframes pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent);
+  }
+  70%,
+  to {
+    box-shadow: 0 0 0 9px transparent;
+  }
+}
+
+/* ==========================================================================
+   3D tilt (TiltCard)
+   ========================================================================== */
+.tilt {
+  width: 100%;
+  perspective: 900px;
+  filter: var(--shadow-paper);
+  touch-action: pan-y;
+}
+
+.tilt__surface {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tilt__light {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Ticket
+   The two notches are cut out with a mask: each half of the ticket gets a transparent
+   circle where the tear-off line meets the edge.
+   ========================================================================== */
+.ticket {
+  --notch: 13px;
+  --stub: 23%;
+  display: grid;
+  grid-template-columns: 1fr var(--stub);
+  container-type: inline-size;
+  border-radius: var(--radius-ticket);
+  background: var(--stock);
+  color: var(--ticket-ink);
+  -webkit-mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0, transparent 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 0, transparent 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle var(--notch) at calc(100% - var(--stub)) 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+}
+
+.ticket__main {
+  display: grid;
+  align-content: space-between;
+  gap: 3cqi;
+  min-height: 44cqi;
+  padding: 6cqi 5cqi 5.5cqi 6.5cqi;
+}
+
+.ticket__value {
+  display: flex;
+  align-items: baseline;
+  gap: 1.6cqi;
+  line-height: 0.8;
+}
+
+.ticket__number {
+  font-size: 25cqi;
+  font-stretch: 62%;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ticket__unit {
+  font-size: max(1rem, 6.5cqi);
+  font-stretch: 70%;
+  font-weight: 820;
+}
+
+.ticket__code {
+  font-size: max(1.05rem, 6.2cqi);
+  font-stretch: 125%;
+  font-weight: 760;
+  letter-spacing: 0.07em;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.ticket__expiry {
+  font-size: max(0.8125rem, 3.3cqi);
+  font-weight: 560;
+  opacity: 0.82;
+}
+
+.ticket__stub {
+  display: grid;
+  place-items: center;
+  margin: var(--notch) 0;
+  border-left: 2px dashed rgb(29 43 83 / 0.4);
+}
+
+/* A barcode, turned on its side to fit the stub. */
+.ticket__barcode {
+  width: 44%;
+  height: 64%;
+  background: repeating-linear-gradient(
+    0deg,
+    var(--ticket-ink) 0 2px,
+    transparent 2px 4px,
+    var(--ticket-ink) 4px 5px,
+    transparent 5px 8px,
+    var(--ticket-ink) 8px 11px,
+    transparent 11px 13px
+  );
+  opacity: 0.85;
+}
+
+.ticket--expired {
+  background: var(--stock-faded);
+}
+
+.ticket--expired .ticket__main,
+.ticket--expired .ticket__stub {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+
+.ticket__stamp {
+  position: absolute;
+  top: 50%;
+  left: 40%;
+  translate: -50% -50%;
+  padding: 0.12em 0.45em 0.18em;
+  border: 0.12em solid var(--stamp);
+  border-radius: 0.2em;
+  color: var(--stamp);
+  font-size: max(1.5rem, 12cqi);
+  font-stretch: 68%;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.03em;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.ticket-skeleton {
+  aspect-ratio: 2.15 / 1;
+  border-radius: var(--radius-ticket);
+  background: linear-gradient(100deg, var(--rule) 30%, var(--surface) 50%, var(--rule) 70%) 0 0 / 300% 100%;
+  opacity: 0.7;
+  animation: shimmer 1.4s linear infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* ==========================================================================
+   New coupon (form + live preview)
+   ========================================================================== */
+.creator {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: 56px;
+}
+
+.creator__form {
+  display: grid;
+  gap: 22px;
+}
+
+.creator__preview {
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+}
+
+/* The one idle movement on the page: the preview ticket floats gently. */
+.creator__float {
+  width: min(100%, 500px);
+  perspective: 1400px;
+  animation: float 7s ease-in-out infinite;
+}
+
+.creator__flip {
+  transform-style: preserve-3d;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* ==========================================================================
+   Coupon list
+   ========================================================================== */
+.coupons {
+  display: grid;
+  gap: 28px;
+}
+
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  margin-left: 12px;
+  padding: 0 0.45em;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--counter);
+  font-size: 0.95rem;
+  font-stretch: 90%;
+  vertical-align: 0.25em;
+}
+
+.coupons__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 40px 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  perspective: 1200px;
+}
+
+.coupons__item {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+.coupons__empty {
+  padding: 32px;
+  border: 2px dashed var(--rule);
+  border-radius: var(--radius-ticket);
+  color: var(--ink-soft);
+}
+
+.notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 20px;
+  border: 2px solid var(--alert);
+  border-radius: var(--radius-field);
+  color: var(--alert);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   Check an order (form + receipt)
+   ========================================================================== */
+.checkout {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  align-items: start;
+  gap: 56px;
+  scroll-margin-top: 24px;
+}
+
+.checkout__form {
+  display: grid;
+  gap: 22px;
+}
+
+.checkout__receipt {
+  display: grid;
+  justify-items: center;
+}
+
+/* Only real paper casts a shadow, not the dashed placeholder. */
+.checkout__receipt:has(.receipt) {
+  filter: var(--shadow-paper);
+}
+
+/* The zigzag bottom edge is a mask of small triangles. */
+.receipt {
+  --zigzag: 9px;
+  width: min(100%, 360px);
+  padding: 20px 26px calc(24px + var(--zigzag));
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-variant-numeric: tabular-nums;
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(2 * var(--zigzag)) 100%;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(2 * var(--zigzag)) 100%;
+}
+
+.receipt__time {
+  padding-bottom: 12px;
+  border-bottom: 2px dashed #c9ccd9;
+  color: var(--paper-soft);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.receipt__lines {
+  display: grid;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.receipt__line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.receipt__line dd {
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.receipt__line--total {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 2px solid var(--paper-ink);
+  font-size: 1.6rem;
+  font-stretch: 74%;
+  font-weight: 860;
+}
+
+.receipt-placeholder {
+  width: min(100%, 360px);
+  padding: 32px 26px;
+  border: 2px dashed var(--rule);
+  border-radius: 4px;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Small screens and reduced motion
+   ========================================================================== */
+@media (max-width: 860px) {
+  .creator,
+  .checkout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  /* Show the preview ticket above the form, where it stays visible while you type. */
+  .creator__preview {
+    order: -1;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 28px 16px 40px;
+  }
+
+  .sections {
+    gap: 64px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creator__float,
+  .ticket-skeleton,
+  .health--ok .health__dot,
+  .field--filled .input {
+    animation: none;
+  }
+}

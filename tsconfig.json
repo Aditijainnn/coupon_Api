@@ -1,0 +1,38 @@
+{
+  // Type-checks everything (src and tests). VS Code uses this file, and so does `npm run typecheck`.
+  // `npm run build` uses tsconfig.build.json instead, which compiles only src into dist.
+  "compilerOptions": {
+    // Output modern JavaScript that every supported Node.js version (20.19+) runs natively.
+    "target": "ES2022",
+
+    // "nodenext" makes TypeScript follow Node's own module rules. Because package.json has
+    // no "type": "module", the compiled files are CommonJS (require/module.exports), which
+    // avoids the ".js extension in imports" errors that ES modules cause on Windows and elsewhere.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+
+    // Load Node.js type definitions (process, console, fetch, ...) explicitly.
+    "types": ["node"],
+
+    // Allow `import express from "express"` for CommonJS packages.
+    "esModuleInterop": true,
+
+    // Catch as many mistakes as possible at compile time.
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Every file must be compilable on its own (required by tsx, which runs `npm run dev` and the tests).
+    "isolatedModules": true,
+
+    // Don't type-check the .d.ts files inside node_modules (faster builds).
+    "skipLibCheck": true,
+
+    // Only check types here; tsconfig.build.json is the one that writes JavaScript files.
+    "noEmit": true
+  },
+  "include": ["src", "tests"]
+}

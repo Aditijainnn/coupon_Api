@@ -1,0 +1,19 @@
+# Dependencies (recreated by `npm install`)
+node_modules/
+
+# Compiled output (recreated by `npm run build`)
+dist/
+
+# Environment variables contain secrets such as the database password: never commit them.
+# .env.example (placeholders only) is committed so others know which variables to set.
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# Operating system files
+.DS_Store
+Thumbs.db

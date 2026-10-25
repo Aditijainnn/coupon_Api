@@ -1,0 +1,14 @@
+{
+  // Used by `npm run build`: compiles the API source (src/*.ts) into dist/*.js, keeping the
+  // same folder layout. All other compiler options come from tsconfig.json.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+
+    // Source maps let stack traces and the VS Code debugger point at the .ts files.
+    "sourceMap": true
+  },
+  "include": ["src"]
+}
