@@ -8,7 +8,7 @@ Node.js, Express 5, TypeScript and MongoDB (through Mongoose).
 - `POST /coupons/apply` takes `{ code, amount }` and returns the amount after the discount, or a
   clear error when the coupon doesn't exist, has expired, or the amount is invalid.
 
-Bonus: a React page in [`client/`](#frontend-bonus-react-page) creates coupons, lists them and tries
+a React page in [`client/`](#frontend-bonus-react-page) creates coupons, lists them and tries
 them on an order.
 
 ![The React page: the new coupon form next to a live 3D preview of the coupon](docs/screenshots/live-preview-3d.png)
